@@ -1,0 +1,6 @@
+@OliveFamingAPI_HostAddress = http://localhost:5196
+
+GET {{OliveFamingAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
