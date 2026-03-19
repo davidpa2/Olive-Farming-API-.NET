@@ -52,4 +52,23 @@ public class RainController : ControllerBase
         return Ok("Se ha introducido un nuevo registro de lluvia");
     }
 
+    // deleteRainLog -> DELETE: /api/Rain/{id}
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteRainLog(int id)
+    {
+        // Find rainLog by ID
+        var rainLog = await _context.RainLogs.FindAsync(id);
+        
+        if (rainLog == null)
+        {
+            return NotFound(new { errors = new[] { "No se ha encontrado un registro de lluvia con ese ID" } });
+        }
+
+        // Remove rain log
+        _context.RainLogs.Remove(rainLog);
+        await _context.SaveChangesAsync();
+
+        return Ok("Se ha eliminado el registro de lluvia");
+    }
+
 }
