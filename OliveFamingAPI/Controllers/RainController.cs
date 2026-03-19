@@ -11,7 +11,7 @@ public class RainController : ControllerBase
 {
     private readonly FarmingDbContext _context;
 
-    // Equivalente a importar la DB. .NET te inyecta la conexión automáticamente.
+    // Inject BD connection
     public RainController(FarmingDbContext context)
     {
         _context = context;
@@ -32,6 +32,24 @@ public class RainController : ControllerBase
         }
 
         return Ok(rainLogs);
+    }
+
+    // newRainLog -> POST: /api/Rain
+    [HttpPost]
+    public async Task<IActionResult> NewRainLog([FromBody] RainLog newLog)
+    {
+        // Check if season exists
+        var seasonExists = await _context.Seasons.AnyAsync(s => s.Id == newLog.SeasonId);
+        if (!seasonExists)
+        {
+            return BadRequest(new { errors = new[] { "No existe una temporada agrícola con ese ID" } });
+        }
+
+        // Save rain log
+        _context.RainLogs.Add(newLog);
+        await _context.SaveChangesAsync();
+
+        return Ok("Se ha introducido un nuevo registro de lluvia");
     }
 
 }
