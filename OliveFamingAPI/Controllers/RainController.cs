@@ -71,4 +71,21 @@ public class RainController : ControllerBase
         return Ok("Se ha eliminado el registro de lluvia");
     }
 
+    // seasonLiters -> GET: /api/Rain/season/{seasonId}/liters
+    [HttpGet("season/{seasonId}/liters")]
+    public async Task<IActionResult> SeasonLiters(int seasonId)
+    {
+        var seasonExists = await _context.Seasons.AnyAsync(s => s.Id == seasonId);
+        if (!seasonExists)
+        {
+            return NotFound(new { errors = new[] { "No se ha encontrado ninguna temporada con ese ID" } });
+        }
+
+        // Get the total liters for a specific season
+        var totalLiters = await _context.RainLogs
+            .Where(r => r.SeasonId == seasonId)
+            .SumAsync(r => r.Liters);
+
+        return Ok(new { liters = totalLiters });
+    }
 }
