@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OliveFarmingAPI.Data;
+using OliveFarmingAPI.Models;
 
 namespace OliveFarmingAPI.Controllers;
 
@@ -15,4 +16,22 @@ public class RainController : ControllerBase
     {
         _context = context;
     }
+
+    // findBySeason -> GET: /api/Rain/season/{seasonId}
+    [HttpGet("season/{seasonId}")]
+    public async Task<IActionResult> FindBySeason(int seasonId)
+    {
+        // Get rainLogs by seasonId
+        var rainLogs = await _context.RainLogs
+            .Where(r => r.SeasonId == seasonId)
+            .ToListAsync();
+
+        if (!rainLogs.Any())
+        {
+            return NotFound(new { errors = new[] { "No se ha encontrado ninguna temporada de lluvias con ese ID" } });
+        }
+
+        return Ok(rainLogs);
+    }
+
 }
