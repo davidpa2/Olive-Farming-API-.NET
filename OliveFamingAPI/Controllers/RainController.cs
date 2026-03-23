@@ -6,7 +6,7 @@ using OliveFarmingAPI.Models;
 namespace OliveFarmingAPI.Controllers;
 
 [ApiController]
-[Route("api/[controller]")] // Esto generará la ruta base: /api/Rain
+[Route("api/[controller]")] // Base route /api/Rain
 public class RainController : ControllerBase
 {
     private readonly FarmingDbContext _context;
