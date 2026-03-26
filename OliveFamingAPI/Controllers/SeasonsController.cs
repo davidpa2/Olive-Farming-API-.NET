@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OliveFarmingAPI.Data;
@@ -41,6 +42,12 @@ public class SeasonsController : ControllerBase
         if (seasonExists)
         {
             return BadRequest(new { errors = new[] { "La temporada agrícola ya existe" } });
+        }
+
+        Regex regex = new Regex("^[0-9]{2}/[0-9]{2}$");
+        if (!regex.IsMatch(newSeason.Name))
+        {
+            return BadRequest(new { errors = new[] { "El código de la temporada no tiene el formato correcto. Por favor, usa un formato como: 25/26" } });
         }
 
         // Save season
