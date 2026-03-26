@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OliveFarmingAPI.Data;
+using OliveFarmingAPI.Models;
 
 namespace OliveFarmingAPI.Controllers;
 
@@ -29,5 +30,23 @@ public class SeasonsController : ControllerBase
         }
 
         return Ok(seasons);
+    }
+
+    // addSeason -> POST: /api/Seasons
+    [HttpPost]
+    public async Task<IActionResult> AddSeason([FromBody] Season newSeason)
+    {
+        // Check if season exists
+        var seasonExists = await _context.Seasons.AnyAsync(s => s.Name == newSeason.Name);
+        if (seasonExists)
+        {
+            return BadRequest(new { errors = new[] { "La temporada agrícola ya existe" } });
+        }
+
+        // Save season
+        _context.Seasons.Add(newSeason);
+        await _context.SaveChangesAsync();
+
+        return Ok("Se ha introducido la nueva temporada agrícola");
     }
 }
