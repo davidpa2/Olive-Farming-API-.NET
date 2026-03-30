@@ -33,6 +33,15 @@ public class SeasonsController : ControllerBase
         return Ok(seasons);
     }
 
+    // getSeasonsCount -> GET: /api/SeasonsCount
+    [HttpGet("count")]
+    public async Task<IActionResult> GetSeasonsCount()
+    {
+        var count = await _context.Seasons.CountAsync();
+
+        return Ok(new { seasonCount = count });
+    }
+
     // addSeason -> POST: /api/Seasons
     [HttpPost]
     public async Task<IActionResult> AddSeason([FromBody] Season newSeason)
