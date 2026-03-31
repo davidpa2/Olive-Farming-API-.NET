@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OliveFarmingAPI.Data;
+using OliveFarmingAPI.DTOs;
 using OliveFarmingAPI.Models;
 
 namespace OliveFarmingAPI.Controllers;
@@ -44,20 +45,28 @@ public class SeasonsController : ControllerBase
 
     // addSeason -> POST: /api/Seasons
     [HttpPost]
-    public async Task<IActionResult> AddSeason([FromBody] Season newSeason)
+    public async Task<IActionResult> AddSeason([FromBody] SeasonsCreateDTO newSeasonDto)
     {
         // Check if season exists
-        var seasonExists = await _context.Seasons.AnyAsync(s => s.Name == newSeason.Name);
+        var seasonExists = await _context.Seasons.AnyAsync(s => s.Name == newSeasonDto.Name);
         if (seasonExists)
         {
             return BadRequest(new { errors = new[] { "La temporada agrícola ya existe" } });
         }
 
         Regex regex = new Regex("^[0-9]{2}/[0-9]{2}$");
-        if (!regex.IsMatch(newSeason.Name))
+        if (!regex.IsMatch(newSeasonDto.Name))
         {
             return BadRequest(new { errors = new[] { "El código de la temporada no tiene el formato correcto. Por favor, usa un formato como: 25/26" } });
         }
+
+        // Mapping Season object
+        var newSeason = new Season
+        {
+            Name = newSeasonDto.Name,
+            StartDate = newSeasonDto.StartDate,
+            EndDate = newSeasonDto.EndDate
+        };
 
         // Save season
         _context.Seasons.Add(newSeason);
