@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OliveFarmingAPI.Data;
+using OliveFarmingAPI.DTOs;
 using OliveFarmingAPI.Models;
 
 namespace OliveFarmingAPI.Controllers;
@@ -36,14 +37,22 @@ public class RainController : ControllerBase
 
     // newRainLog -> POST: /api/Rain
     [HttpPost]
-    public async Task<IActionResult> NewRainLog([FromBody] RainLog newLog)
+    public async Task<IActionResult> NewRainLog([FromBody] RainLogCreateDTO newLogDto)
     {
         // Check if season exists
-        var seasonExists = await _context.Seasons.AnyAsync(s => s.Id == newLog.SeasonId);
+        var seasonExists = await _context.Seasons.AnyAsync(s => s.Id == newLogDto.SeasonId);
         if (!seasonExists)
         {
             return BadRequest(new { errors = new[] { "No existe una temporada agrícola con ese ID" } });
         }
+
+        // Mapping Season object
+        var newLog = new RainLog
+        {
+            Date = newLogDto.Date,
+            Liters = newLogDto.Liters,
+            SeasonId = newLogDto.SeasonId
+        };
 
         // Save rain log
         _context.RainLogs.Add(newLog);
