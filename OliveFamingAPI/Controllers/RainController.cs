@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OliveFarmingAPI.Data;
@@ -6,6 +7,7 @@ using OliveFarmingAPI.Models;
 
 namespace OliveFarmingAPI.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")] // Base route /api/Rain
 public class RainController : ControllerBase

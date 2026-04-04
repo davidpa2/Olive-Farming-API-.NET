@@ -1,7 +1,27 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using OliveFarmingAPI.Data;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// JWT configuration
+var secretKey = builder.Configuration.GetSection("JwtSettings:SecretKey").Value;
+var keyBytes = Encoding.UTF8.GetBytes(secretKey!);
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
+            ValidateIssuer = false, 
+            ValidateAudience = false
+        };
+    });
+//--
 
 builder.Services.AddDbContext<FarmingDbContext>(options =>
     options.UseSqlite("Data Source=farming.db"));
@@ -21,6 +41,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Authentication and Authorization
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
