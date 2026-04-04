@@ -7,6 +7,7 @@ using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OliveFarmingAPI.Controllers;
 
@@ -62,6 +63,27 @@ public class UsersController : ControllerBase
         var token = GenerateJwtToken(user);
 
         return Ok(new { jwt = token });
+    }
+
+    [HttpGet("me")]
+    [Authorize]
+    public async Task<IActionResult> Me()
+    {
+        // Get JWT data
+        var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+            return Unauthorized();
+
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null) return NotFound();
+
+        return Ok(new 
+        { 
+            name = user.Name, 
+            surname = user.Surname, 
+            email = user.Email 
+        });
     }
 
     private string GenerateJwtToken(User user)
