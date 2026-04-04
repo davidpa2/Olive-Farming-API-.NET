@@ -3,6 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using OliveFarmingAPI.Data;
 using OliveFarmingAPI.Models;
 using OliveFarmingAPI.DTOs;
+using System.Text;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 
 namespace OliveFarmingAPI.Controllers;
 
@@ -41,5 +45,43 @@ public class UsersController : ControllerBase
         await _context.SaveChangesAsync();
 
         return Ok("Se ha registrado el usuario");
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] UserLoginDTO loginDto)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
+        if (user == null)
+            return Unauthorized(new { errors = new[] { "Credenciales incorrectas" } });
+
+        // Verify password
+        if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
+            return Unauthorized(new { errors = new[] { "Credenciales incorrectas" } });
+
+        // Generate JWT
+        var token = GenerateJwtToken(user);
+
+        return Ok(new { jwt = token });
+    }
+
+    private string GenerateJwtToken(User user)
+    {
+        var secretKey = _config.GetSection("JwtSettings:SecretKey").Value;
+        var keyBytes = Encoding.UTF8.GetBytes(secretKey!);
+        var tokenHandler = new JwtSecurityTokenHandler();
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(new[] //Add id and email claims
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email)
+            }),
+            Expires = DateTime.UtcNow.AddDays(7), // setExpirationTime('7d')
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256Signature)
+        };
+
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
     }
 }
