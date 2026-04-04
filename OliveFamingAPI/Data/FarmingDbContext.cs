@@ -13,4 +13,5 @@ public class FarmingDbContext: DbContext
     // Tables at database
     public DbSet<Season> Seasons { get; set; }
     public DbSet<RainLog> RainLogs { get; set; }
+    public DbSet<User> Users { get; set; }
 }
