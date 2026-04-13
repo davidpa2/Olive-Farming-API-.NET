@@ -22,7 +22,7 @@ public class RainController : ControllerBase
 
     // findBySeason -> GET: /api/Rain/season/{seasonName}
     [HttpGet("season/{seasonName}")]
-    public async Task<IActionResult> FindBySeason(string seasonName)
+    public async Task<ActionResult<List<RainLog>>> FindBySeason(string seasonName)
     {
         var season = await _context.Seasons.FirstOrDefaultAsync(s => s.Name == seasonName);
         if (season == null)
@@ -45,7 +45,7 @@ public class RainController : ControllerBase
 
     // newRainLog -> POST: /api/Rain
     [HttpPost]
-    public async Task<IActionResult> NewRainLog([FromBody] RainLogCreateDTO newLogDto)
+    public async Task<ActionResult<string>> NewRainLog([FromBody] RainLogCreateDTO newLogDto)
     {
         // Check if season exists
         var season = await _context.Seasons.FirstOrDefaultAsync(s => s.Name == newLogDto.SeasonName);
@@ -71,7 +71,7 @@ public class RainController : ControllerBase
 
     // deleteRainLog -> DELETE: /api/Rain/{id}
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteRainLog(int id)
+    public async Task<ActionResult<string>> DeleteRainLog(int id)
     {
         // Find rainLog by ID
         var rainLog = await _context.RainLogs.FindAsync(id);
@@ -90,7 +90,7 @@ public class RainController : ControllerBase
 
     // seasonLiters -> GET: /api/Rain/season/{seasonName}/liters
     [HttpGet("season/{seasonName}/liters")]
-    public async Task<IActionResult> SeasonLiters(string seasonName)
+    public async Task<ActionResult<SeasonLitersDTO>> SeasonLiters(string seasonName)
     {
         var seasonExists = await _context.Seasons.FirstOrDefaultAsync(s => s.Name == seasonName);
         if (seasonExists == null)
@@ -103,6 +103,6 @@ public class RainController : ControllerBase
             .Where(r => r.SeasonId == seasonExists.Id)
             .SumAsync(r => r.Liters);
 
-        return Ok(new { liters = totalLiters });
+        return Ok(new SeasonLitersDTO { Liters = totalLiters });
     }
 }
