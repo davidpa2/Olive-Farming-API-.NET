@@ -5,5 +5,5 @@ public class RainLogCreateDTO
 {
     public DateTime Date { get; set; }
     public double Liters { get; set; }
-    public int SeasonId { get; set; }
+    public required string SeasonName { get; set; }
 }
