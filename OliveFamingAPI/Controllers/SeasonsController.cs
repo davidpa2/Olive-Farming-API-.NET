@@ -24,7 +24,7 @@ public class SeasonsController : ControllerBase
 
     // getAllSeasons -> GET: /api/Seasons
     [HttpGet]
-    public async Task<IActionResult> GetAllSeasons()
+    public async Task<ActionResult<List<string>>> GetAllSeasons()
     {
         var seasons = await _context.Seasons.Select(s => s.Name).ToListAsync();
         
@@ -38,7 +38,7 @@ public class SeasonsController : ControllerBase
 
     // getSeasonsCount -> GET: /api/SeasonsCount
     [HttpGet("count")]
-    public async Task<IActionResult> GetSeasonsCount()
+    public async Task<ActionResult<SeasonCountDTO>> GetSeasonsCount()
     {
         var count = await _context.Seasons.CountAsync();
 
