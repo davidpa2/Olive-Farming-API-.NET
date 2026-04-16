@@ -21,7 +21,7 @@ public class RainController : ControllerBase
     }
 
     // findBySeason -> GET: /api/Rain/season/{seasonName}
-    [HttpGet("season/{seasonName}")]
+    [HttpGet("season/{seasonName}", Name = "FindBySeason")]
     public async Task<ActionResult<List<RainLog>>> FindBySeason(string seasonName)
     {
         var season = await _context.Seasons.FirstOrDefaultAsync(s => s.Name == seasonName);
@@ -44,7 +44,7 @@ public class RainController : ControllerBase
     }
 
     // newRainLog -> POST: /api/Rain
-    [HttpPost]
+    [HttpPost(Name = "NewRainLog")]
     public async Task<ActionResult<string>> NewRainLog([FromBody] RainLogCreateDTO newLogDto)
     {
         // Check if season exists
@@ -70,7 +70,7 @@ public class RainController : ControllerBase
     }
 
     // deleteRainLog -> DELETE: /api/Rain/{id}
-    [HttpDelete("{id}")]
+    [HttpDelete("{id}", Name = "DeleteRainLog")]
     public async Task<ActionResult<string>> DeleteRainLog(int id)
     {
         // Find rainLog by ID
@@ -89,7 +89,7 @@ public class RainController : ControllerBase
     }
 
     // seasonLiters -> GET: /api/Rain/season/{seasonName}/liters
-    [HttpGet("season/{seasonName}/liters")]
+    [HttpGet("season/{seasonName}/liters", Name = "SeasonLiters")]
     public async Task<ActionResult<SeasonLitersDTO>> SeasonLiters(string seasonName)
     {
         var seasonExists = await _context.Seasons.FirstOrDefaultAsync(s => s.Name == seasonName);
