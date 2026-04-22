@@ -20,9 +20,9 @@ public class RainController : ControllerBase
         _context = context;
     }
 
-    // findBySeason -> GET: /api/Rain/season/{seasonName}
-    [HttpGet("season/{seasonName}", Name = "FindBySeason")]
-    public async Task<ActionResult<List<RainLog>>> FindBySeason(string seasonName)
+    // findBySeason -> GET: /api/Rain/season
+    [HttpGet("season", Name = "FindBySeason")]
+    public async Task<ActionResult<List<RainLog>>> FindBySeason([FromQuery] string seasonName)
     {
         var season = await _context.Seasons.FirstOrDefaultAsync(s => s.Name == seasonName);
         if (season == null)
