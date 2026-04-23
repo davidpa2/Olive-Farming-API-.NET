@@ -88,9 +88,9 @@ public class RainController : ControllerBase
         return Ok("Se ha eliminado el registro de lluvia");
     }
 
-    // seasonLiters -> GET: /api/Rain/season/{seasonName}/liters
-    [HttpGet("season/{seasonName}/liters", Name = "SeasonLiters")]
-    public async Task<ActionResult<SeasonLitersDTO>> SeasonLiters(string seasonName)
+    // seasonLiters -> GET: /api/Rain/seasonLiters
+    [HttpGet("seasonLiters", Name = "SeasonLiters")]
+    public async Task<ActionResult<SeasonLitersDTO>> SeasonLiters([FromQuery] string seasonName)
     {
         var seasonExists = await _context.Seasons.FirstOrDefaultAsync(s => s.Name == seasonName);
         if (seasonExists == null)
