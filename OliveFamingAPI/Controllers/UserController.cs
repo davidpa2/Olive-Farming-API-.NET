@@ -24,7 +24,7 @@ public class UsersController : ControllerBase
         _config = config; // Inyect configuration to read appsettings.json
     }
 
-    [HttpPost("register")]
+    [HttpPost("register", Name = "Register")]
     public async Task<IActionResult> Register([FromBody] UserRegisterDTO userDto)
     {
         var userExists = await _context.Users.AnyAsync(u => u.Email == userDto.Email);
@@ -48,8 +48,8 @@ public class UsersController : ControllerBase
         return Ok("Se ha registrado el usuario");
     }
 
-    [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] UserLoginDTO loginDto)
+    [HttpPost("login", Name = "Login")]
+    public async Task<ActionResult<LoginDTO>> Login([FromBody] UserLoginDTO loginDto)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
         if (user == null)
@@ -65,9 +65,9 @@ public class UsersController : ControllerBase
         return Ok(new { jwt = token });
     }
 
-    [HttpGet("me")]
+    [HttpGet("me", Name = "Me")]
     [Authorize]
-    public async Task<IActionResult> Me()
+    public async Task<ActionResult<UserMeDTO>> Me()
     {
         // Get JWT data
         var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -78,11 +78,11 @@ public class UsersController : ControllerBase
         var user = await _context.Users.FindAsync(userId);
         if (user == null) return NotFound();
 
-        return Ok(new 
+        return Ok(new UserMeDTO
         { 
-            name = user.Name, 
-            surname = user.Surname, 
-            email = user.Email 
+            Name = user.Name, 
+            Surname = user.Surname, 
+            Email = user.Email 
         });
     }
 

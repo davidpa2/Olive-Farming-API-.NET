@@ -20,32 +20,38 @@ public class RainController : ControllerBase
         _context = context;
     }
 
-    // findBySeason -> GET: /api/Rain/season/{seasonId}
-    [HttpGet("season/{seasonId}")]
-    public async Task<IActionResult> FindBySeason(int seasonId)
+    // findBySeason -> GET: /api/Rain/season
+    [HttpGet("season", Name = "FindBySeason")]
+    public async Task<ActionResult<List<RainLog>>> FindBySeason([FromQuery] string seasonName)
     {
+        var season = await _context.Seasons.FirstOrDefaultAsync(s => s.Name == seasonName);
+        if (season == null)
+        {
+            return NotFound(new { errors = new[] { "No se ha encontrado ninguna temporada con ese nombre" } });
+        }
+
         // Get rainLogs by seasonId
         var rainLogs = await _context.RainLogs
-            .Where(r => r.SeasonId == seasonId)
+            .Where(r => r.SeasonId == season.Id)
             .ToListAsync();
 
         if (!rainLogs.Any())
         {
-            return NotFound(new { errors = new[] { "No se ha encontrado ninguna temporada de lluvias con ese ID" } });
+            return NotFound(new { errors = new[] { "No se ha encontrado ningún registro de lluvias en la temporada " + seasonName } });
         }
 
         return Ok(rainLogs);
     }
 
     // newRainLog -> POST: /api/Rain
-    [HttpPost]
-    public async Task<IActionResult> NewRainLog([FromBody] RainLogCreateDTO newLogDto)
+    [HttpPost(Name = "NewRainLog")]
+    public async Task<ActionResult<string>> NewRainLog([FromBody] RainLogCreateDTO newLogDto)
     {
         // Check if season exists
-        var seasonExists = await _context.Seasons.AnyAsync(s => s.Id == newLogDto.SeasonId);
-        if (!seasonExists)
+        var season = await _context.Seasons.FirstOrDefaultAsync(s => s.Name == newLogDto.SeasonName);
+        if (season == null)
         {
-            return BadRequest(new { errors = new[] { "No existe una temporada agrícola con ese ID" } });
+            return BadRequest(new { errors = new[] { "No existe una temporada agrícola con ese nombre" } });
         }
 
         // Mapping Season object
@@ -53,7 +59,7 @@ public class RainController : ControllerBase
         {
             Date = newLogDto.Date,
             Liters = newLogDto.Liters,
-            SeasonId = newLogDto.SeasonId
+            SeasonId = season.Id
         };
 
         // Save rain log
@@ -64,8 +70,8 @@ public class RainController : ControllerBase
     }
 
     // deleteRainLog -> DELETE: /api/Rain/{id}
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteRainLog(int id)
+    [HttpDelete("{id}", Name = "DeleteRainLog")]
+    public async Task<ActionResult<string>> DeleteRainLog(int id)
     {
         // Find rainLog by ID
         var rainLog = await _context.RainLogs.FindAsync(id);
@@ -82,21 +88,21 @@ public class RainController : ControllerBase
         return Ok("Se ha eliminado el registro de lluvia");
     }
 
-    // seasonLiters -> GET: /api/Rain/season/{seasonId}/liters
-    [HttpGet("season/{seasonId}/liters")]
-    public async Task<IActionResult> SeasonLiters(int seasonId)
+    // seasonLiters -> GET: /api/Rain/seasonLiters
+    [HttpGet("seasonLiters", Name = "SeasonLiters")]
+    public async Task<ActionResult<SeasonLitersDTO>> SeasonLiters([FromQuery] string seasonName)
     {
-        var seasonExists = await _context.Seasons.AnyAsync(s => s.Id == seasonId);
-        if (!seasonExists)
+        var seasonExists = await _context.Seasons.FirstOrDefaultAsync(s => s.Name == seasonName);
+        if (seasonExists == null)
         {
-            return NotFound(new { errors = new[] { "No se ha encontrado ninguna temporada con ese ID" } });
+            return NotFound(new { errors = new[] { "No se ha encontrado ninguna temporada con ese nombre" } });
         }
 
         // Get the total liters for a specific season
         var totalLiters = await _context.RainLogs
-            .Where(r => r.SeasonId == seasonId)
+            .Where(r => r.SeasonId == seasonExists.Id)
             .SumAsync(r => r.Liters);
 
-        return Ok(new { liters = totalLiters });
+        return Ok(new SeasonLitersDTO { Liters = totalLiters });
     }
 }
