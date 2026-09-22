@@ -69,13 +69,42 @@ public class RainController : ControllerBase
         return Ok("Se ha introducido un nuevo registro de lluvia");
     }
 
+    // editRainLog -> PUT: /api/Rain
+    [HttpPut(Name = "EditRainLog")]
+    public async Task<ActionResult<string>> EditRainLog([FromBody] EditRainLogDTO editLogDto)
+    {
+        //Check if rain log exists
+        var logToUpdate = await _context.RainLogs.FindAsync(editLogDto.Id);
+        if (logToUpdate == null)
+        {
+            return NotFound(new { errors = new[] { "No se encontró el registro de lluvia." } });
+        }
+
+        // Check if season exists
+        var season = await _context.Seasons.FirstOrDefaultAsync(s => s.Name == editLogDto.SeasonName);
+        if (season == null)
+        {
+            return BadRequest(new { errors = new[] { "No existe una temporada agrícola con ese nombre" } });
+        }
+
+        // Mapping Season object
+        logToUpdate.Date = editLogDto.Date;
+        logToUpdate.Liters = editLogDto.Liters;
+        logToUpdate.SeasonId = season.Id;
+
+        // Save changes
+        await _context.SaveChangesAsync();
+
+        return Ok("Se ha modificado un registro de lluvia");
+    }
+
     // deleteRainLog -> DELETE: /api/Rain/{id}
     [HttpDelete("{id}", Name = "DeleteRainLog")]
     public async Task<ActionResult<string>> DeleteRainLog(int id)
     {
         // Find rainLog by ID
         var rainLog = await _context.RainLogs.FindAsync(id);
-        
+
         if (rainLog == null)
         {
             return NotFound(new { errors = new[] { "No se ha encontrado un registro de lluvia con ese ID" } });
