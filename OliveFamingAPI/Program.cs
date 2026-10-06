@@ -23,8 +23,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 //--
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
 builder.Services.AddDbContext<FarmingDbContext>(options =>
-    options.UseSqlite("Data Source=farming.db"));
+    options.UseSqlServer(connectionString)
+);
 
 builder.Services.AddControllers();
 
