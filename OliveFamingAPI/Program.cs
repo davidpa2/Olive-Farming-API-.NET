@@ -6,6 +6,17 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Allow any origin for production API
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 // JWT configuration
 var secretKey = builder.Configuration.GetSection("JwtSettings:SecretKey").Value;
 var keyBytes = Encoding.UTF8.GetBytes(secretKey!);
@@ -17,7 +28,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
-            ValidateIssuer = false, 
+            ValidateIssuer = false,
             ValidateAudience = false
         };
     });
@@ -57,6 +68,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAll");
 
 // Authentication and Authorization
 app.UseAuthentication();
