@@ -36,7 +36,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddDbContext<FarmingDbContext>(options =>
+builder.Services.AddDbContextPool<FarmingDbContext>(options =>
     options.UseSqlServer(connectionString)
 );
 
