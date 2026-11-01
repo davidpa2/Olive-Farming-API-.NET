@@ -26,7 +26,7 @@ public class SeasonsController : ControllerBase
     [HttpGet(Name = "GetAllSeasons")]
     public async Task<ActionResult<List<string>>> GetAllSeasons()
     {
-        var seasons = await _context.Seasons.Select(s => s.Name).ToListAsync();
+        var seasons = await _context.Seasons.OrderBy(s => s.Name).Select(s => s.Name).ToListAsync();
         
         if (seasons == null)
         {
