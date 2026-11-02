@@ -22,6 +22,123 @@ namespace OliveFamingAPI.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("OliveFarmingAPI.Models.PhytosanitaryTreatment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ApplicatorId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Dose")
+                        .HasColumnType("decimal(10,4)");
+
+                    b.Property<string>("DoseUnit")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("Efficacy")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("EquipmentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Observations")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("PhytosanitaryProblem")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("PlotId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("RegistrationNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("TreatedAreaHa")
+                        .HasColumnType("decimal(10,4)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlotId");
+
+                    b.ToTable("PhytosanitaryTreatments");
+                });
+
+            modelBuilder.Entity("OliveFarmingAPI.Models.Plot", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("CultivatedAreaHa")
+                        .HasColumnType("decimal(10,4)");
+
+                    b.Property<int>("Enclosure")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsIrrigated")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("MunicipalityCode")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Parcel")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Polygon")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProvinceCode")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("SigpacAreaHa")
+                        .HasColumnType("decimal(10,4)");
+
+                    b.Property<string>("SigpacUse")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("Species")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Variety")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Plots");
+                });
+
             modelBuilder.Entity("OliveFarmingAPI.Models.RainLog", b =>
                 {
                     b.Property<int>("Id")
@@ -1600,6 +1717,17 @@ namespace OliveFamingAPI.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("OliveFarmingAPI.Models.PhytosanitaryTreatment", b =>
+                {
+                    b.HasOne("OliveFarmingAPI.Models.Plot", "Plot")
+                        .WithMany("Treatments")
+                        .HasForeignKey("PlotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Plot");
+                });
+
             modelBuilder.Entity("OliveFarmingAPI.Models.RainLog", b =>
                 {
                     b.HasOne("OliveFarmingAPI.Models.Season", null)
@@ -1607,6 +1735,11 @@ namespace OliveFamingAPI.Migrations
                         .HasForeignKey("SeasonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("OliveFarmingAPI.Models.Plot", b =>
+                {
+                    b.Navigation("Treatments");
                 });
 
             modelBuilder.Entity("OliveFarmingAPI.Models.Season", b =>

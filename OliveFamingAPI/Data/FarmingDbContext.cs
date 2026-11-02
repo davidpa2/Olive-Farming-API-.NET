@@ -14,6 +14,8 @@ public class FarmingDbContext: DbContext
     public DbSet<Season> Seasons { get; set; }
     public DbSet<RainLog> RainLogs { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<Plot> Plots { get; set; }
+    public DbSet<PhytosanitaryTreatment> PhytosanitaryTreatments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
