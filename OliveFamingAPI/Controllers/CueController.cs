@@ -36,7 +36,7 @@ public class CueController : ControllerBase
         return Ok(plots);
     }
 
-    [HttpGet("treatments")]
+    [HttpGet("treatments", Name = "GetTreatments")]
     public async Task<ActionResult<IEnumerable<TreatmentDto>>> GetTreatments()
     {
         var treatments = await _context.PhytosanitaryTreatments
