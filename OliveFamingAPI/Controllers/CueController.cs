@@ -59,7 +59,7 @@ public class CueController : ControllerBase
     }
 
     [HttpPost("treatments", Name = "CreateTreatment")]
-    public async Task<ActionResult> CreateTreatment(TreatmentCreateDto dto)
+    public async Task<ActionResult<TreatmentDto>> CreateTreatment(TreatmentCreateDto dto)
     {
         if (dto.StartDate > DateTime.Now)
             return BadRequest("La fecha del tratamiento no puede ser futura.");
@@ -71,7 +71,7 @@ public class CueController : ControllerBase
         if (!plotExists)
             return NotFound("La parcela indicada no existe.");
 
-        var treatment = new PhytosanitaryTreatment
+        var entity = new PhytosanitaryTreatment
         {
             PlotId = dto.PlotId,
             StartDate = dto.StartDate,
@@ -84,9 +84,24 @@ public class CueController : ControllerBase
             Efficacy = dto.Efficacy
         };
 
-        _context.PhytosanitaryTreatments.Add(treatment);
+        _context.PhytosanitaryTreatments.Add(entity);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetPlots), new { id = treatment.Id }, treatment);
+        // Map saved entity
+        var createdDto = new TreatmentDto
+        {
+            Id = entity.Id,
+            PlotId = entity.PlotId,
+            StartDate = entity.StartDate,
+            TreatedAreaHa = entity.TreatedAreaHa,
+            PhytosanitaryProblem = entity.PhytosanitaryProblem,
+            ProductName = entity.ProductName,
+            RegistrationNumber = entity.RegistrationNumber,
+            Dose = entity.Dose,
+            DoseUnit = entity.DoseUnit,
+            Efficacy = entity.Efficacy
+        };
+
+        return Ok(createdDto);
     }
 }
