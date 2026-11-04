@@ -17,7 +17,7 @@ public class CueController : ControllerBase
         _context = context;
     }
 
-    [HttpGet("plots")]
+    [HttpGet("plots", Name = "GetPlots")]
     public async Task<ActionResult<IEnumerable<PlotDto>>> GetPlots()
     {
         var plots = await _context.Plots
@@ -36,7 +36,29 @@ public class CueController : ControllerBase
         return Ok(plots);
     }
 
-    [HttpPost("treatments")]
+    [HttpGet("treatments")]
+    public async Task<ActionResult<IEnumerable<TreatmentDto>>> GetTreatments()
+    {
+        var treatments = await _context.PhytosanitaryTreatments
+            .Select(t => new TreatmentDto
+            {
+                Id = t.Id,
+                PlotId = t.PlotId,
+                StartDate = t.StartDate,
+                TreatedAreaHa = t.TreatedAreaHa,
+                PhytosanitaryProblem = t.PhytosanitaryProblem,
+                ProductName = t.ProductName,
+                RegistrationNumber = t.RegistrationNumber,
+                Dose = t.Dose,
+                DoseUnit = t.DoseUnit,
+                Efficacy = t.Efficacy
+            })
+            .ToListAsync();
+
+        return Ok(treatments);
+    }
+
+    [HttpPost("treatments", Name = "CreateTreatment")]
     public async Task<ActionResult> CreateTreatment(TreatmentCreateDto dto)
     {
         if (dto.StartDate > DateTime.Now)
