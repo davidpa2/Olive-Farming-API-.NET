@@ -36,6 +36,42 @@ public class CueController : ControllerBase
         return Ok(plots);
     }
 
+    [HttpPost("plots", Name = "CreatePlot")]
+    public async Task<ActionResult<PlotDto>> CreatePlot(PlotCreateDto dto)
+    {
+        var plot = new Plot
+        {
+            ProvinceCode = dto.ProvinceCode,
+            MunicipalityCode = dto.MunicipalityCode,
+            Polygon = dto.Polygon,
+            Parcel = dto.Parcel,
+            Enclosure = dto.Enclosure,
+            SigpacAreaHa = dto.SigpacAreaHa,
+            CultivatedAreaHa = dto.CultivatedAreaHa,
+            SigpacUse = dto.SigpacUse,
+            Species = dto.Species,
+            Variety = dto.Variety,
+            IsIrrigated = dto.IsIrrigated
+        };
+
+        _context.Plots.Add(plot);
+        await _context.SaveChangesAsync();
+
+        var plotDto = new PlotDto
+        {
+            Id = plot.Id,
+            ProvinceCode = plot.ProvinceCode,
+            MunicipalityCode = plot.MunicipalityCode,
+            Polygon = plot.Polygon,
+            Parcel = plot.Parcel,
+            Enclosure = plot.Enclosure,
+            CultivatedAreaHa = plot.CultivatedAreaHa,
+            Species = plot.Species
+        };
+
+        return Ok(plotDto);
+    }
+
     [HttpGet("treatments", Name = "GetTreatments")]
     public async Task<ActionResult<IEnumerable<TreatmentDto>>> GetTreatments()
     {
