@@ -95,49 +95,60 @@ public class CueController : ControllerBase
     }
 
     [HttpPost("treatments", Name = "CreateTreatment")]
-    public async Task<ActionResult<TreatmentDto>> CreateTreatment(TreatmentCreateDto dto)
+    public async Task<ActionResult<IEnumerable<TreatmentDto>>> CreateTreatment(TreatmentCreateDto dto)
     {
         if (dto.StartDate > DateTime.Now)
             return BadRequest("La fecha del tratamiento no puede ser futura.");
 
-        if (string.IsNullOrWhiteSpace(dto.RegistrationNumber))
-            return BadRequest("El número de registro del producto es obligatorio.");
+        if (!dto.PlotIds.Any())
+            return BadRequest("Debes seleccionar al menos una parcela.");
 
-        var plotExists = await _context.Plots.AnyAsync(p => p.Id == dto.PlotId);
-        if (!plotExists)
-            return NotFound("La parcela indicada no existe.");
+        // Look for all the selected plots
+        var plots = await _context.Plots
+            .Where(p => dto.PlotIds.Contains(p.Id))
+            .ToListAsync();
 
-        var entity = new PhytosanitaryTreatment
+        if (plots.Count != dto.PlotIds.Count)
+            return NotFound("Alguna de las parcelas indicadas no existe.");
+
+        var entities = new List<PhytosanitaryTreatment>();
+
+        foreach (var plot in plots)
         {
-            PlotId = dto.PlotId,
-            StartDate = dto.StartDate,
-            TreatedAreaHa = dto.TreatedAreaHa,
-            PhytosanitaryProblem = dto.PhytosanitaryProblem,
-            ProductName = dto.ProductName,
-            RegistrationNumber = dto.RegistrationNumber,
-            Dose = dto.Dose,
-            DoseUnit = dto.DoseUnit,
-            Efficacy = dto.Efficacy
-        };
+            entities.Add(new PhytosanitaryTreatment
+            {
+                PlotId = plot.Id,
+                StartDate = dto.StartDate,
+                // Using plot CultivatedAreaHa
+                TreatedAreaHa = plot.CultivatedAreaHa,
+                PhytosanitaryProblem = dto.PhytosanitaryProblem,
+                ProductName = dto.ProductName,
+                RegistrationNumber = dto.RegistrationNumber,
+                Dose = dto.Dose,
+                DoseUnit = dto.DoseUnit,
+                Efficacy = dto.Efficacy
+            });
+        }
 
-        _context.PhytosanitaryTreatments.Add(entity);
+        _context.PhytosanitaryTreatments.AddRange(entities);
         await _context.SaveChangesAsync();
 
-        // Map saved entity
-        var createdDto = new TreatmentDto
+        // Map the saved entities to return them
+        var createdDtos = entities.Select(e => new TreatmentDto
         {
-            Id = entity.Id,
-            PlotId = entity.PlotId,
-            StartDate = entity.StartDate,
-            TreatedAreaHa = entity.TreatedAreaHa,
-            PhytosanitaryProblem = entity.PhytosanitaryProblem,
-            ProductName = entity.ProductName,
-            RegistrationNumber = entity.RegistrationNumber,
-            Dose = entity.Dose,
-            DoseUnit = entity.DoseUnit,
-            Efficacy = entity.Efficacy
-        };
+            Id = e.Id,
+            PlotId = e.PlotId,
+            StartDate = e.StartDate,
+            TreatedAreaHa = e.TreatedAreaHa,
+            PhytosanitaryProblem = e.PhytosanitaryProblem,
+            ProductName = e.ProductName,
+            RegistrationNumber = e.RegistrationNumber,
+            Dose = e.Dose,
+            DoseUnit = e.DoseUnit,
+            Efficacy = e.Efficacy
+        }).ToList();
 
-        return Ok(createdDto);
+        return Ok(createdDtos);
     }
+
 }

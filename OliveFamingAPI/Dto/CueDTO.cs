@@ -28,9 +28,9 @@ public class TreatmentDto
 
 public class TreatmentCreateDto
 {
-    public int PlotId { get; set; }
+    public List<int> PlotIds { get; set; } = new(); 
+    
     public DateTime StartDate { get; set; }
-    public decimal TreatedAreaHa { get; set; }
     public string PhytosanitaryProblem { get; set; } = string.Empty;
     public string ProductName { get; set; } = string.Empty;
     public string RegistrationNumber { get; set; } = string.Empty;
