@@ -151,4 +151,16 @@ public class CueController : ControllerBase
         return Ok(createdDtos);
     }
 
+    [HttpDelete("treatments/{id}", Name = "DeleteTreatment")]
+    public async Task<ActionResult> DeleteTreatment(int id)
+    {
+        var treatment = await _context.PhytosanitaryTreatments.FindAsync(id);
+        if (treatment == null) 
+            return NotFound("El tratamiento indicado no existe.");
+
+        _context.PhytosanitaryTreatments.Remove(treatment);
+        await _context.SaveChangesAsync();
+
+        return NoContent(); // Returna 204 no content
+    }
 }
