@@ -151,11 +151,49 @@ public class CueController : ControllerBase
         return Ok(createdDtos);
     }
 
+    [HttpPut("treatments/{id}", Name = "UpdateTreatment")]
+    public async Task<ActionResult<TreatmentDto>> UpdateTreatment(int id, TreatmentUpdateDto dto)
+    {
+        var treatment = await _context.PhytosanitaryTreatments.FindAsync(id);
+        if (treatment == null) return NotFound("El tratamiento no existe.");
+
+        var plot = await _context.Plots.FindAsync(dto.PlotId);
+        if (plot == null) return NotFound("La parcela indicada no existe.");
+
+        treatment.PlotId = dto.PlotId;
+        treatment.StartDate = dto.StartDate;
+        treatment.TreatedAreaHa = plot.CultivatedAreaHa;
+        treatment.PhytosanitaryProblem = dto.PhytosanitaryProblem;
+        treatment.ProductName = dto.ProductName;
+        treatment.RegistrationNumber = dto.RegistrationNumber;
+        treatment.Dose = dto.Dose;
+        treatment.DoseUnit = dto.DoseUnit;
+        treatment.Efficacy = dto.Efficacy;
+
+        await _context.SaveChangesAsync();
+
+        var updatedDto = new TreatmentDto
+        {
+            Id = treatment.Id,
+            PlotId = treatment.PlotId,
+            StartDate = treatment.StartDate,
+            TreatedAreaHa = treatment.TreatedAreaHa,
+            PhytosanitaryProblem = treatment.PhytosanitaryProblem,
+            ProductName = treatment.ProductName,
+            RegistrationNumber = treatment.RegistrationNumber,
+            Dose = treatment.Dose,
+            DoseUnit = treatment.DoseUnit,
+            Efficacy = treatment.Efficacy
+        };
+
+        return Ok(updatedDto);
+    }
+
     [HttpDelete("treatments/{id}", Name = "DeleteTreatment")]
     public async Task<ActionResult> DeleteTreatment(int id)
     {
         var treatment = await _context.PhytosanitaryTreatments.FindAsync(id);
-        if (treatment == null) 
+        if (treatment == null)
             return NotFound("El tratamiento indicado no existe.");
 
         _context.PhytosanitaryTreatments.Remove(treatment);

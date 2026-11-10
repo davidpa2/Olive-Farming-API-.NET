@@ -39,6 +39,18 @@ public class TreatmentCreateDto
     public string Efficacy { get; set; } = string.Empty;
 }
 
+public class TreatmentUpdateDto
+{
+    public int PlotId { get; set; }
+    public DateTime StartDate { get; set; }
+    public string PhytosanitaryProblem { get; set; } = string.Empty;
+    public string ProductName { get; set; } = string.Empty;
+    public string RegistrationNumber { get; set; } = string.Empty;
+    public decimal Dose { get; set; }
+    public string DoseUnit { get; set; } = string.Empty;
+    public string Efficacy { get; set; } = string.Empty;
+}
+
 public class PlotCreateDto
 {
     public int ProvinceCode { get; set; }
