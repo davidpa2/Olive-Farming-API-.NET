@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using OliveFarmingAPI.Data;
 using OliveFarmingAPI.Models;
 using OliveFarmingAPI.Dto;
+using ClosedXML.Excel;
+using System.IO;
 
 namespace OliveFarmingAPI.Controllers;
 
@@ -200,5 +202,75 @@ public class CueController : ControllerBase
         await _context.SaveChangesAsync();
 
         return NoContent(); // Returna 204 no content
+    }
+
+    [HttpGet("export/{year}/{month}", Name = "ExportTreatments")]
+    public async Task<IActionResult> ExportTreatments(int year, int month)
+    {
+        // Look for the treatments including plot data
+        var treatments = await _context.PhytosanitaryTreatments
+            .Include(t => t.Plot)
+            .Where(t => t.StartDate.Year == year && t.StartDate.Month == month)
+            .OrderBy(t => t.StartDate)
+            .ToListAsync();
+
+        if (!treatments.Any())
+            return NotFound("No hay tratamientos registrados en este mes.");
+
+        // Create Excel book
+        using var workbook = new XLWorkbook();
+        var worksheet = workbook.Worksheets.Add($"CUE_{month:D2}_{year}");
+
+        // Headers (based in SGA-CEX fields)
+        var headers = new string[] {
+            "Fecha de Aplicación", "Provincia", "Municipio", "Polígono",
+            "Parcela", "Recinto", "Superficie Tratada (ha)", "Problema Fitosanitario",
+            "Producto Comercial", "Nº Registro MITECO", "Dosis", "Unidad Dosis", "Eficacia"
+        };
+
+        for (int i = 0; i < headers.Length; i++)
+        {
+            var cell = worksheet.Cell(1, i + 1);
+            cell.Value = headers[i];
+            cell.Style.Font.Bold = true;
+            cell.Style.Fill.BackgroundColor = XLColor.LightGreen;
+            cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        }
+
+        // Fill rows with real data
+        var row = 2;
+        foreach (var t in treatments)
+        {
+            worksheet.Cell(row, 1).Value = t.StartDate.ToString("dd/MM/yyyy");
+
+            if (t.Plot != null)
+            {
+                worksheet.Cell(row, 2).Value = t.Plot.ProvinceCode;
+                worksheet.Cell(row, 3).Value = t.Plot.MunicipalityCode;
+                worksheet.Cell(row, 4).Value = t.Plot.Polygon;
+                worksheet.Cell(row, 5).Value = t.Plot.Parcel;
+                worksheet.Cell(row, 6).Value = t.Plot.Enclosure;
+            }
+            worksheet.Cell(row, 7).Value = t.TreatedAreaHa;
+            worksheet.Cell(row, 8).Value = t.PhytosanitaryProblem;
+            worksheet.Cell(row, 9).Value = t.ProductName;
+            worksheet.Cell(row, 10).Value = t.RegistrationNumber;
+            worksheet.Cell(row, 11).Value = t.Dose;
+            worksheet.Cell(row, 12).Value = t.DoseUnit;
+            worksheet.Cell(row, 13).Value = t.Efficacy;
+            row++;
+        }
+
+        // Adjust colum widths
+        worksheet.Columns().AdjustToContents();
+
+        // Return binary string
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+        var content = stream.ToArray();
+        var contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        var fileName = $"Cuaderno_Campo_{year}_{month:D2}.xlsx";
+
+        return File(content, contentType, fileName);
     }
 }
