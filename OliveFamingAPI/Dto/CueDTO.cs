@@ -65,3 +65,9 @@ public class PlotCreateDto
     public string Variety { get; set; } = string.Empty;
     public bool IsIrrigated { get; set; }
 }
+
+public class CueSummaryDto
+{
+    public int TotalTreatments { get; set; }
+    public DateTime? LastTreatmentDate { get; set; }
+}

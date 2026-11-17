@@ -96,6 +96,23 @@ public class CueController : ControllerBase
         return Ok(treatments);
     }
 
+    [HttpGet("summary", Name = "GetCueSummary")]
+    public async Task<ActionResult<CueSummaryDto>> GetCueSummary()
+    {
+        var count = await _context.PhytosanitaryTreatments.CountAsync();
+
+        var lastDate = await _context.PhytosanitaryTreatments
+            .OrderByDescending(t => t.StartDate)
+            .Select(t => (DateTime?)t.StartDate)
+            .FirstOrDefaultAsync();
+
+        return Ok(new CueSummaryDto
+        {
+            TotalTreatments = count,
+            LastTreatmentDate = lastDate
+        });
+    }
+
     [HttpPost("treatments", Name = "CreateTreatment")]
     public async Task<ActionResult<IEnumerable<TreatmentDto>>> CreateTreatment(TreatmentCreateDto dto)
     {
