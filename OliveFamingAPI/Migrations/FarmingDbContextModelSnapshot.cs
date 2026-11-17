@@ -129,12 +129,17 @@ namespace OliveFamingAPI.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Variety")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Plots");
                 });
@@ -1726,6 +1731,17 @@ namespace OliveFamingAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Plot");
+                });
+
+            modelBuilder.Entity("OliveFarmingAPI.Models.Plot", b =>
+                {
+                    b.HasOne("OliveFarmingAPI.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("OliveFarmingAPI.Models.RainLog", b =>
