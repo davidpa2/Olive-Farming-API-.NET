@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using OliveFarmingAPI.Data;
 using OliveFarmingAPI.DTOs;
 using OliveFarmingAPI.Models;
+using OliveFarmingAPI.Utils;
 
 namespace OliveFarmingAPI.Controllers;
 
@@ -24,6 +25,8 @@ public class RainController : ControllerBase
     [HttpGet("season", Name = "FindBySeason")]
     public async Task<ActionResult<List<RainLog>>> FindBySeason([FromQuery] string seasonName)
     {
+        var userId = User.GetCurrentUserId();
+        
         var season = await _context.Seasons.FirstOrDefaultAsync(s => s.Name == seasonName);
         if (season == null)
         {
@@ -32,7 +35,7 @@ public class RainController : ControllerBase
 
         // Get rainLogs by seasonId
         var rainLogs = await _context.RainLogs
-            .Where(r => r.SeasonId == season.Id)
+            .Where(r => r.SeasonId == season.Id && r.UserId == userId)
             .ToListAsync();
 
         if (!rainLogs.Any())
@@ -47,6 +50,8 @@ public class RainController : ControllerBase
     [HttpPost(Name = "NewRainLog")]
     public async Task<ActionResult<string>> NewRainLog([FromBody] RainLogCreateDTO newLogDto)
     {
+        var userId = User.GetCurrentUserId();
+        
         // Check if season exists
         var season = await _context.Seasons.FirstOrDefaultAsync(s => s.Name == newLogDto.SeasonName);
         if (season == null)
@@ -59,7 +64,8 @@ public class RainController : ControllerBase
         {
             Date = newLogDto.Date,
             Liters = newLogDto.Liters,
-            SeasonId = season.Id
+            SeasonId = season.Id,
+            UserId = userId
         };
 
         // Save rain log
@@ -73,8 +79,10 @@ public class RainController : ControllerBase
     [HttpPut(Name = "EditRainLog")]
     public async Task<ActionResult<string>> EditRainLog([FromBody] EditRainLogDTO editLogDto)
     {
+        var userId = User.GetCurrentUserId();
+
         //Check if rain log exists
-        var logToUpdate = await _context.RainLogs.FindAsync(editLogDto.Id);
+        var logToUpdate = await _context.RainLogs.FirstOrDefaultAsync(r => r.Id == editLogDto.Id && r.UserId == userId);
         if (logToUpdate == null)
         {
             return NotFound(new { errors = new[] { "No se encontró el registro de lluvia." } });
@@ -102,8 +110,10 @@ public class RainController : ControllerBase
     [HttpDelete("{id}", Name = "DeleteRainLog")]
     public async Task<ActionResult<string>> DeleteRainLog(int id)
     {
+        var userId = User.GetCurrentUserId();
+
         // Find rainLog by ID
-        var rainLog = await _context.RainLogs.FindAsync(id);
+        var rainLog = await _context.RainLogs.FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
 
         if (rainLog == null)
         {
@@ -121,6 +131,8 @@ public class RainController : ControllerBase
     [HttpGet("seasonLiters", Name = "SeasonLiters")]
     public async Task<ActionResult<SeasonLitersDTO>> SeasonLiters([FromQuery] string seasonName)
     {
+        var userId = User.GetCurrentUserId();
+        
         var seasonExists = await _context.Seasons.FirstOrDefaultAsync(s => s.Name == seasonName);
         if (seasonExists == null)
         {
@@ -129,7 +141,7 @@ public class RainController : ControllerBase
 
         // Get the total liters for a specific season
         var totalLiters = await _context.RainLogs
-            .Where(r => r.SeasonId == seasonExists.Id)
+            .Where(r => r.SeasonId == seasonExists.Id && r.UserId == userId)
             .SumAsync(r => r.Liters);
 
         return Ok(new SeasonLitersDTO { Liters = totalLiters });

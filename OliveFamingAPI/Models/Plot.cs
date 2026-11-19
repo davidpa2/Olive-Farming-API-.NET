@@ -10,6 +10,9 @@ namespace OliveFarmingAPI.Models
         [Key]
         public int Id { get; set; }
 
+        public int UserId { get; set; }
+        public User? User { get; set; }
+
         // SIGPAC references
         public int ProvinceCode { get; set; } 
         public int MunicipalityCode { get; set; } 

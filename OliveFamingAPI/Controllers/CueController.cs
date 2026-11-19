@@ -4,7 +4,7 @@ using OliveFarmingAPI.Data;
 using OliveFarmingAPI.Models;
 using OliveFarmingAPI.Dto;
 using ClosedXML.Excel;
-using System.IO;
+using OliveFarmingAPI.Utils;
 
 namespace OliveFarmingAPI.Controllers;
 
@@ -22,7 +22,10 @@ public class CueController : ControllerBase
     [HttpGet("plots", Name = "GetPlots")]
     public async Task<ActionResult<IEnumerable<PlotDto>>> GetPlots()
     {
+        var userId = User.GetCurrentUserId();
+
         var plots = await _context.Plots
+            .Where(p => p.UserId == userId)
             .Select(p => new PlotDto
             {
                 Id = p.Id,
@@ -41,8 +44,11 @@ public class CueController : ControllerBase
     [HttpPost("plots", Name = "CreatePlot")]
     public async Task<ActionResult<PlotDto>> CreatePlot(PlotCreateDto dto)
     {
+        var userId = User.GetCurrentUserId();
+
         var plot = new Plot
         {
+            UserId = userId,
             ProvinceCode = dto.ProvinceCode,
             MunicipalityCode = dto.MunicipalityCode,
             Polygon = dto.Polygon,
@@ -77,7 +83,10 @@ public class CueController : ControllerBase
     [HttpGet("treatments", Name = "GetTreatments")]
     public async Task<ActionResult<IEnumerable<TreatmentDto>>> GetTreatments()
     {
+        var userId = User.GetCurrentUserId();
+
         var treatments = await _context.PhytosanitaryTreatments
+            .Where(t => t.Plot.UserId == userId)
             .Select(t => new TreatmentDto
             {
                 Id = t.Id,
@@ -99,9 +108,14 @@ public class CueController : ControllerBase
     [HttpGet("summary", Name = "GetCueSummary")]
     public async Task<ActionResult<CueSummaryDto>> GetCueSummary()
     {
-        var count = await _context.PhytosanitaryTreatments.CountAsync();
+        var userId = User.GetCurrentUserId();
+
+        var count = await _context.PhytosanitaryTreatments
+            .Where(t => t.Plot.UserId == userId)
+            .CountAsync();
 
         var lastDate = await _context.PhytosanitaryTreatments
+            .Where(t => t.Plot.UserId == userId)
             .OrderByDescending(t => t.StartDate)
             .Select(t => (DateTime?)t.StartDate)
             .FirstOrDefaultAsync();
@@ -122,9 +136,11 @@ public class CueController : ControllerBase
         if (!dto.PlotIds.Any())
             return BadRequest("Debes seleccionar al menos una parcela.");
 
+        var userId = User.GetCurrentUserId();
+
         // Look for all the selected plots
         var plots = await _context.Plots
-            .Where(p => dto.PlotIds.Contains(p.Id))
+            .Where(p => dto.PlotIds.Contains(p.Id) && p.UserId == userId)
             .ToListAsync();
 
         if (plots.Count != dto.PlotIds.Count)
@@ -173,7 +189,9 @@ public class CueController : ControllerBase
     [HttpPut("treatments/{id}", Name = "UpdateTreatment")]
     public async Task<ActionResult<TreatmentDto>> UpdateTreatment(int id, TreatmentUpdateDto dto)
     {
-        var treatment = await _context.PhytosanitaryTreatments.FindAsync(id);
+        var userId = User.GetCurrentUserId();
+
+        var treatment = await _context.PhytosanitaryTreatments.FirstOrDefaultAsync(t => t.Id == id && t.Plot!.UserId == userId);
         if (treatment == null) return NotFound("El tratamiento no existe.");
 
         var plot = await _context.Plots.FindAsync(dto.PlotId);
@@ -211,7 +229,9 @@ public class CueController : ControllerBase
     [HttpDelete("treatments/{id}", Name = "DeleteTreatment")]
     public async Task<ActionResult> DeleteTreatment(int id)
     {
-        var treatment = await _context.PhytosanitaryTreatments.FindAsync(id);
+        var userId = User.GetCurrentUserId();
+
+        var treatment = await _context.PhytosanitaryTreatments.FirstOrDefaultAsync(t => t.Id == id && t.Plot!.UserId == userId);
         if (treatment == null)
             return NotFound("El tratamiento indicado no existe.");
 
@@ -224,10 +244,12 @@ public class CueController : ControllerBase
     [HttpGet("export/{year}/{month}", Name = "ExportTreatments")]
     public async Task<IActionResult> ExportTreatments(int year, int month)
     {
+        var userId = User.GetCurrentUserId();
+        
         // Look for the treatments including plot data
         var treatments = await _context.PhytosanitaryTreatments
             .Include(t => t.Plot)
-            .Where(t => t.StartDate.Year == year && t.StartDate.Month == month)
+            .Where(t => t.StartDate.Year == year && t.StartDate.Month == month && t.Plot.UserId == userId)
             .OrderBy(t => t.StartDate)
             .ToListAsync();
 
