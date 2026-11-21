@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using OliveFarmingAPI.Utils;
 
 namespace OliveFarmingAPI.Controllers;
 
@@ -71,7 +72,7 @@ public class UsersController : ControllerBase
     {
         // Get JWT data
         var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        
+
         if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
             return Unauthorized();
 
@@ -79,10 +80,44 @@ public class UsersController : ControllerBase
         if (user == null) return NotFound();
 
         return Ok(new UserMeDTO
-        { 
-            Name = user.Name, 
-            Surname = user.Surname, 
-            Email = user.Email 
+        {
+            Name = user.Name,
+            Surname = user.Surname,
+            Email = user.Email,
+            ApplicatorName = user.ApplicatorName,
+            ApplicatorNif = user.ApplicatorNif,
+            RopoNumber = user.RopoNumber,
+            EquipmentRoma = user.EquipmentRoma,
+            LastIteafDate = user.LastIteafDate
+        });
+    }
+
+    [HttpPut("cue-profile", Name = "UpdateCueProfile")]
+    [Authorize]
+    public async Task<ActionResult<UserMeDTO>> UpdateCueProfile([FromBody] UserCueProfileUpdateDTO dto)
+    {
+        var userId = User.GetCurrentUserId();
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null) return NotFound();
+
+        user.ApplicatorName = dto.ApplicatorName;
+        user.ApplicatorNif = dto.ApplicatorNif;
+        user.RopoNumber = dto.RopoNumber;
+        user.EquipmentRoma = dto.EquipmentRoma;
+        user.LastIteafDate = dto.LastIteafDate;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new UserMeDTO
+        {
+            Name = user.Name,
+            Surname = user.Surname,
+            Email = user.Email,
+            ApplicatorName = user.ApplicatorName,
+            ApplicatorNif = user.ApplicatorNif,
+            RopoNumber = user.RopoNumber,
+            EquipmentRoma = user.EquipmentRoma,
+            LastIteafDate = user.LastIteafDate
         });
     }
 
