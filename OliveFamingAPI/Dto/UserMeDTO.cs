@@ -11,6 +11,10 @@ public class UserMeDTO
     public string? RopoNumber { get; set; }
     public string? EquipmentRoma { get; set; }
     public DateTime? LastIteafDate { get; set; }
+
+    public string? ReafaNumber { get; set; } // REAFA inscription number 
+    public string? HolderName { get; set; }  // Name of the holding holder
+    public string? HolderNif { get; set; }   // Holder NIF
 }
 
 public class UserCueProfileUpdateDTO
@@ -20,4 +24,8 @@ public class UserCueProfileUpdateDTO
     public string? RopoNumber { get; set; }
     public string? EquipmentRoma { get; set; }
     public DateTime? LastIteafDate { get; set; }
+
+    public string? ReafaNumber { get; set; } // REAFA inscription number 
+    public string? HolderName { get; set; }  // Name of the holding holder
+    public string? HolderNif { get; set; }   // Holder NIF
 }

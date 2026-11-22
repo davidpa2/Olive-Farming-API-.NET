@@ -88,7 +88,10 @@ public class UsersController : ControllerBase
             ApplicatorNif = user.ApplicatorNif,
             RopoNumber = user.RopoNumber,
             EquipmentRoma = user.EquipmentRoma,
-            LastIteafDate = user.LastIteafDate
+            LastIteafDate = user.LastIteafDate,
+            ReafaNumber = user.ReafaNumber,
+            HolderName = user.HolderName,
+            HolderNif = user.HolderNif,
         });
     }
 
@@ -105,6 +108,9 @@ public class UsersController : ControllerBase
         user.RopoNumber = dto.RopoNumber;
         user.EquipmentRoma = dto.EquipmentRoma;
         user.LastIteafDate = dto.LastIteafDate;
+        user.ReafaNumber = dto.ReafaNumber;
+        user.HolderName = dto.HolderName;
+        user.HolderNif = dto.HolderNif;
 
         await _context.SaveChangesAsync();
 
@@ -117,7 +123,10 @@ public class UsersController : ControllerBase
             ApplicatorNif = user.ApplicatorNif,
             RopoNumber = user.RopoNumber,
             EquipmentRoma = user.EquipmentRoma,
-            LastIteafDate = user.LastIteafDate
+            LastIteafDate = user.LastIteafDate,
+            ReafaNumber = user.ReafaNumber,
+            HolderName = user.HolderName,
+            HolderNif = user.HolderNif,
         });
     }
 

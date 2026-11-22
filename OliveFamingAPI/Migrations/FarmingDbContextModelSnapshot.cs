@@ -1927,6 +1927,12 @@ namespace OliveFamingAPI.Migrations
                     b.Property<string>("EquipmentRoma")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("HolderName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HolderNif")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("LastIteafDate")
                         .HasColumnType("datetime2");
 
@@ -1936,6 +1942,9 @@ namespace OliveFamingAPI.Migrations
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReafaNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RopoNumber")
