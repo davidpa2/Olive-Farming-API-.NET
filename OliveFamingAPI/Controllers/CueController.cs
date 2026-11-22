@@ -265,12 +265,14 @@ public class CueController : ControllerBase
 
         // SGA-CEX headers
         var headers = new string[] {
-            "Fecha de Aplicación", "Provincia", "Municipio", "Polígono",
-            "Parcela", "Recinto", "Superficie Tratada (ha)", "Problema Fitosanitario",
-            "Justificación", "Producto Comercial", "Nº Registro MITECO",
-            "Dosis", "Unidad Dosis", "Eficacia",
-            "Aplicador", "NIF Aplicador", "Nº ROPO", "ROMA Equipo", "Fecha ITEAF"
-        };
+        "Fecha de Aplicación", "Provincia", "Municipio", "Polígono",
+        "Parcela", "Recinto", "Cultivo", "Superficie Tratada (ha)",
+        "Problema Fitosanitario", "Justificación", "Producto Comercial",
+        "Nº Registro MITECO", "Dosis", "Unidad Dosis",
+        "Cantidad Total", "Unidad Total", "Eficacia",
+        "Titular Explotación", "NIF Titular", "Nº REAFA",
+        "Aplicador", "NIF Aplicador", "Nº ROPO", "ROMA Equipo", "Fecha ITEAF"
+    };
 
         for (int i = 0; i < headers.Length; i++)
         {
@@ -285,7 +287,9 @@ public class CueController : ControllerBase
         var row = 2;
         foreach (var t in treatments)
         {
-            worksheet.Cell(row, 1).Value = t.StartDate.ToString("dd/MM/yyyy");
+            worksheet.Cell(row, 1).Value = t.StartDate;
+            worksheet.Cell(row, 1).Style.DateFormat.Format = "dd/MM/yyyy";
+
             if (t.Plot != null)
             {
                 worksheet.Cell(row, 2).Value = t.Plot.ProvinceCode;
@@ -294,21 +298,38 @@ public class CueController : ControllerBase
                 worksheet.Cell(row, 5).Value = t.Plot.Parcel;
                 worksheet.Cell(row, 6).Value = t.Plot.Enclosure;
             }
-            worksheet.Cell(row, 7).Value = t.TreatedAreaHa;
-            worksheet.Cell(row, 8).Value = t.PhytosanitaryProblem;
-            worksheet.Cell(row, 9).Value = "Tratamiento preventivo/curativo"; // Base justification
-            worksheet.Cell(row, 10).Value = t.ProductName;
-            worksheet.Cell(row, 11).Value = t.RegistrationNumber;
-            worksheet.Cell(row, 12).Value = t.Dose;
-            worksheet.Cell(row, 13).Value = t.DoseUnit;
-            worksheet.Cell(row, 14).Value = t.Efficacy;
+
+            worksheet.Cell(row, 7).Value = "Olivar";
+            worksheet.Cell(row, 8).Value = t.TreatedAreaHa;
+            worksheet.Cell(row, 9).Value = t.PhytosanitaryProblem;
+            worksheet.Cell(row, 10).Value = "Tratamiento preventivo/curativo";
+            worksheet.Cell(row, 11).Value = t.ProductName;
+            worksheet.Cell(row, 12).Value = t.RegistrationNumber;
+            worksheet.Cell(row, 13).Value = t.Dose;
+            worksheet.Cell(row, 14).Value = t.DoseUnit;
+
+            worksheet.Cell(row, 15).Value = Math.Round(t.Dose * t.TreatedAreaHa, 3);
+            worksheet.Cell(row, 16).Value = t.DoseUnit.Replace("/ha", "");
+
+            worksheet.Cell(row, 17).Value = t.Efficacy;
 
             // Applicator data and machinery
-            worksheet.Cell(row, 15).Value = user.ApplicatorName ?? "";
-            worksheet.Cell(row, 16).Value = user.ApplicatorNif ?? "";
-            worksheet.Cell(row, 17).Value = user.RopoNumber ?? "";
-            worksheet.Cell(row, 18).Value = user.EquipmentRoma ?? "";
-            worksheet.Cell(row, 19).Value = user.LastIteafDate?.ToString("dd/MM/yyyy") ?? "";
+            worksheet.Cell(row, 18).Value = user.HolderName ?? "";
+            worksheet.Cell(row, 19).Value = user.HolderNif ?? "";
+            worksheet.Cell(row, 20).Value = user.ReafaNumber ?? "";
+
+            // Datos del aplicador y maquinaria
+            worksheet.Cell(row, 21).Value = user.ApplicatorName ?? "";
+            worksheet.Cell(row, 22).Value = user.ApplicatorNif ?? "";
+            worksheet.Cell(row, 23).Value = user.RopoNumber ?? "";
+            worksheet.Cell(row, 24).Value = user.EquipmentRoma ?? "";
+
+            if (user.LastIteafDate.HasValue)
+            {
+                worksheet.Cell(row, 25).Value = user.LastIteafDate.Value;
+                worksheet.Cell(row, 25).Style.DateFormat.Format = "dd/MM/yyyy";
+            }
+
             row++;
         }
 
