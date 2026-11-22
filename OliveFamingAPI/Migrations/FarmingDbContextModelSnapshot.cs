@@ -1914,9 +1914,27 @@ namespace OliveFamingAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ApplicatorName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ApplicatorNif")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EquipmentRoma")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HolderName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HolderNif")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("LastIteafDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1924,6 +1942,12 @@ namespace OliveFamingAPI.Migrations
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReafaNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RopoNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Surname")
