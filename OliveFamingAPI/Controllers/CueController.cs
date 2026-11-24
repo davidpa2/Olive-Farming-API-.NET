@@ -82,6 +82,71 @@ public class CueController : ControllerBase
         return Ok(plotDto);
     }
 
+    [HttpPut("plots/{id}", Name = "UpdatePlot")]
+    public async Task<ActionResult<PlotDto>> UpdatePlot(int id, PlotCreateDto dto)
+    {
+        var userId = User.GetCurrentUserId();
+
+        var plot = await _context.Plots
+            .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+
+        if (plot == null)
+            return NotFound("Parcela no encontrada.");
+
+        plot.ProvinceCode = dto.ProvinceCode;
+        plot.MunicipalityCode = dto.MunicipalityCode;
+        plot.Polygon = dto.Polygon;
+        plot.Parcel = dto.Parcel;
+        plot.Enclosure = dto.Enclosure;
+        plot.SigpacAreaHa = dto.SigpacAreaHa;
+        plot.CultivatedAreaHa = dto.CultivatedAreaHa;
+        plot.SigpacUse = dto.SigpacUse;
+        plot.Species = dto.Species;
+        plot.Variety = dto.Variety;
+        plot.IsIrrigated = dto.IsIrrigated;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new PlotDto
+        {
+            Id = plot.Id,
+            ProvinceCode = plot.ProvinceCode,
+            MunicipalityCode = plot.MunicipalityCode,
+            Polygon = plot.Polygon,
+            Parcel = plot.Parcel,
+            Enclosure = plot.Enclosure,
+            SigpacAreaHa = plot.SigpacAreaHa,
+            CultivatedAreaHa = plot.CultivatedAreaHa,
+            SigpacUse = plot.SigpacUse,
+            Species = plot.Species,
+            Variety = plot.Variety,
+            IsIrrigated = plot.IsIrrigated
+        });
+    }
+
+    [HttpDelete("plots/{id}", Name = "DeletePlot")]
+    public async Task<IActionResult> DeletePlot(int id)
+    {
+        var userId = User.GetCurrentUserId();
+
+        var plot = await _context.Plots
+            .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+
+        if (plot == null)
+            return NotFound("Parcela no encontrada.");
+
+        var hasTreatments = await _context.PhytosanitaryTreatments
+            .AnyAsync(t => t.PlotId == id);
+
+        if (hasTreatments)
+            return BadRequest("No puedes eliminar una parcela que tiene tratamientos registrados en el CUE.");
+
+        _context.Plots.Remove(plot);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
     [HttpGet("treatments", Name = "GetTreatments")]
     public async Task<ActionResult<IEnumerable<TreatmentDto>>> GetTreatments()
     {
