@@ -36,8 +36,12 @@ public class CueController : ControllerBase
                 Polygon = p.Polygon,
                 Parcel = p.Parcel,
                 Enclosure = p.Enclosure,
+                SigpacAreaHa = p.SigpacAreaHa,
                 CultivatedAreaHa = p.CultivatedAreaHa,
-                Species = p.Species
+                SigpacUse = p.SigpacUse,
+                Species = p.Species,
+                Variety = p.Variety,
+                IsIrrigated = p.IsIrrigated
             }).ToListAsync();
 
         return Ok(plots);
