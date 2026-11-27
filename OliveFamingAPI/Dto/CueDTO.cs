@@ -8,8 +8,12 @@ public class PlotDto
     public int Polygon { get; set; }
     public int Parcel { get; set; }
     public int Enclosure { get; set; }
+    public decimal SigpacAreaHa { get; set; }
     public decimal CultivatedAreaHa { get; set; }
+    public string SigpacUse { get; set; } = string.Empty;
     public string Species { get; set; } = string.Empty;
+    public string Variety { get; set; } = string.Empty;
+    public bool IsIrrigated { get; set; }
 }
 
 public class TreatmentDto
